@@ -1,0 +1,29 @@
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Shop Page";
+}
+
+<h1>Shop</h1>
+<p>@Model.Count() item(s) available.</p>
+<div class="row">
+    @foreach (var p in Model)
+    {
+        <div class="col-md-4 shop-item">
+            <div class="border rounded p-1">
+                <div class="shop-image-container">
+                    <div class="row h-100 justify-content-center align-items-center">
+                        <img src="~/img/ProductIcons/@(p.ImageName).jpg" class="img-fluid shop-image" alt="@p.ImageName" />
+                    </div>
+                </div>
+                <h4>@p.Name</h4>
+                <ul>
+                    <li>Size: @p.Size</li>
+                    <li>Price: £@p.Price</li>
+                    <li>Category: @p.Category</li>
+                    <li>Description: @p.Description</li>
+                </ul>
+                <button id="buyButton" class="btn btn-success">Buy</button>
+            </div>
+        </div>
+    }
+</div>
