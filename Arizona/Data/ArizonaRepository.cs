@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Arizona.Data
@@ -28,8 +29,24 @@ namespace Arizona.Data
         {
             if (includeItems)
             {
-
                 return _ctx.Orders
+                           .Include(o => o.Items)
+                           .ThenInclude(i => i.Product)
+                           .ToList();
+            }
+            else
+            {
+                return _ctx.Orders
+                           .ToList();
+            }
+        }
+
+        public IEnumerable<Order> GetAllOrdersByUsername(string username, bool includeItems)
+        {
+            if (includeItems)
+            {
+                return _ctx.Orders
+                            .Where(o => o.User.UserName == username)
                            .Include(o => o.Items)
                            .ThenInclude(i => i.Product)
                            .ToList();
@@ -65,12 +82,12 @@ namespace Arizona.Data
                         .FirstOrDefault();
         }
 
-        public Order GetOrderById(int id)
+        public Order GetOrderById(string username, int id)
         {
             return _ctx.Orders
                        .Include(o => o.Items)
                        .ThenInclude(i => i.Product)
-                       .Where(o => o.Id == id)
+                       .Where(o => o.Id == id && o.User.UserName == username)
                        .FirstOrDefault();
         }
 

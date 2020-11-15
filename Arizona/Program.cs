@@ -26,7 +26,7 @@ namespace Arizona
             using (var scope = scopeFactory.CreateScope())
             {
                 var seeder = scope.ServiceProvider.GetService<ArizonaSeeder>();
-                seeder.Seed();
+                seeder.SeedAsync().Wait();
             }
         }
 

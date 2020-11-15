@@ -2,6 +2,9 @@
 using Arizona.Data.Entities;
 using Arizona.ViewModels;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,19 +15,21 @@ using System.Threading.Tasks;
 namespace Arizona.Controllers
 {
     [Route("api/[Controller]")]
+    [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
     public class OrdersController: Controller
     {
-        private readonly IArizonaRepository _repository;
+        private readonly IArizonaRepository _arizonaRepository;
         private readonly ILogger<OrdersController> _logger;
         private readonly IMapper _mapper;
+        private readonly UserManager<StoreUser> _userManager;
 
-        public OrdersController(IArizonaRepository repository,
-          ILogger<OrdersController> logger,
-          IMapper mapper)
+        public OrdersController(IArizonaRepository arizonaRepository, ILogger<OrdersController> logger,
+            IMapper mapper, UserManager<StoreUser> userManager)
         {
-            _repository = repository;
+            _arizonaRepository = arizonaRepository;
             _logger = logger;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -32,7 +37,9 @@ namespace Arizona.Controllers
         {
             try
             {
-                var results = _repository.GetAllOrders(includeItems);
+                var username = User.Identity.Name;
+
+                var results = _arizonaRepository.GetAllOrdersByUsername(username, includeItems);
 
                 return Ok(_mapper.Map<IEnumerable<Order>, IEnumerable<OrderViewModel>>(results));
             }
@@ -48,7 +55,7 @@ namespace Arizona.Controllers
         {
             try
             {
-                var order = _repository.GetOrderById(id);
+                var order = _arizonaRepository.GetOrderById(User.Identity.Name, id);
 
                 if (order != null) return Ok(_mapper.Map<Order, OrderViewModel>(order));
                 else return NotFound();
@@ -61,7 +68,7 @@ namespace Arizona.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] OrderViewModel model)
+        public async Task<IActionResult> Post([FromBody] OrderViewModel model)
         {
             try
             {
@@ -74,8 +81,11 @@ namespace Arizona.Controllers
                         newOrder.OrderDate = DateTime.Now;
                     }
 
-                    _repository.AddEntity(newOrder);
-                    if (_repository.SaveAll())
+                    var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
+                    newOrder.User = currentUser;
+
+                    _arizonaRepository.AddEntity(newOrder);
+                    if (_arizonaRepository.SaveAll())
                     {
                         return Created($"/api/orders/{newOrder.Id}", _mapper.Map<Order, OrderViewModel>(newOrder));
                     }

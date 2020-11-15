@@ -1,4 +1,5 @@
 ﻿using Arizona.Data.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Arizona.Data
 {
-    public class ArizonaContext : DbContext
+    public class ArizonaContext : IdentityDbContext<StoreUser>
     {
         public ArizonaContext(DbContextOptions<ArizonaContext> options) : base(options)
         {

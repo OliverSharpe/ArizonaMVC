@@ -1,11 +1,16 @@
 {
   "ConnectionStrings": {
-    "ArizonaConnectionString": "server=(localdb)\\ProjectsV13;Database=ArizonaDb;Integrated Security=true;MultipleActiveResultSets=true;"
+    "ArizonaConnectionString": "server=(localdb)\\ProjectsV13;Database=ArizonaDb;Integrated Security=true;MultipleActiveResultSets=true;Application Name=EntityFramework",
   },
   "Logging": {
     "LogLevel": {
       "Default": "Information",
       "Microsoft": "Warning"
     }
+  },
+  "Tokens": {
+    "Key": "qwerwqrqwrweqrwqerqwerwq",
+    "Issuer": "localhost",
+    "Audience": "users"
   }
 }

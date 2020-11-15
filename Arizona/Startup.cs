@@ -2,17 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Arizona.Data;
+using Arizona.Data.Entities;
 using AutoMapper;
 using DutchTreat.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Arizona
 {
@@ -28,6 +32,23 @@ namespace Arizona
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddIdentity<StoreUser, IdentityRole>(cfg => 
+            {
+                cfg.User.RequireUniqueEmail = true;
+            })
+              .AddEntityFrameworkStores<ArizonaContext>();
+
+            services.AddAuthentication()
+                .AddCookie()
+                .AddJwtBearer( cfg =>
+                    cfg.TokenValidationParameters = new TokenValidationParameters()
+                    { 
+                        ValidIssuer = Configuration["Tokens:Issuer"],
+                        ValidAudience = Configuration["Tokens:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"]))
+                    }
+                );
+
             services.AddDbContext<ArizonaContext>(cfg =>
                cfg.UseSqlServer(Configuration.GetConnectionString("ArizonaConnectionString"))
             );
@@ -54,8 +75,9 @@ namespace Arizona
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseRouting();
+            app.UseAuthentication();
 
+            app.UseRouting();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

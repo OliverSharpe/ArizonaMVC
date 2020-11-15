@@ -6,12 +6,15 @@ using Arizona.Data;
 using Arizona.Data.Entities;
 using Arizona.ViewModels;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Arizona.Controllers
 {
     [Route("api/orders/{orderid}/orderitem")]
+    [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
     public class OrderItemsController : Controller
     {
         private readonly IArizonaRepository _arizonaRepository;
@@ -30,7 +33,7 @@ namespace Arizona.Controllers
         [HttpGet]
         public IActionResult Get(int orderId)
         {
-            var order = _arizonaRepository.GetOrderById(orderId);
+            var order = _arizonaRepository.GetOrderById(User.Identity.Name, orderId);
             if (order != null)
             {
                 return Ok(_mapper.Map<IEnumerable<OrderItem>, IEnumerable<OrderItemViewModel>>(order.Items));
@@ -41,7 +44,7 @@ namespace Arizona.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int orderId, int id)
         {
-            var order = _arizonaRepository.GetOrderById(orderId);
+            var order = _arizonaRepository.GetOrderById(User.Identity.Name, orderId);
             if (order != null)
             {
                 var item = order.Items.Where(i => i.Id == id).FirstOrDefault();

@@ -9,6 +9,7 @@ using Arizona.Models;
 using Arizona.ViewModels;
 using DutchTreat.Services;
 using Arizona.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Arizona.Controllers
 {
@@ -43,6 +44,7 @@ namespace Arizona.Controllers
             return View();
         }
 
+        [Authorize]
         public IActionResult Shop()
         {
             var products = _arizonaRepository.GetAllProducts();
